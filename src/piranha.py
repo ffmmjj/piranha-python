@@ -1,27 +1,25 @@
-"""Main entry point for piranha-python's features."""
-import astroid
+from libcst import FlattenSentinel, matchers
+from libcst.codemod import VisitorBasedCodemodCommand
 
 
-def remove_flag_from(code_block, flag_to_remove_name):
-    """
-    Rewrite the code_block assuming that the passed feature flag is True.
+class PiranhaCommand(VisitorBasedCodemodCommand):
+    DESCRIPTION = "Removes feature flag usages from code whilst trying to preserve the implementation's behavior"
 
-    :param code_block: block of python code that will be re-written
-    :param flag_to_remove_name: name of the feature flag that should be assumed to be True inside code_block
-    :return: a semantics-preserving version of code_block with all references to the passed feature flag removed.
-    """
-    astroid.MANAGER.register_transform(
-        astroid.If, _process_if_block, predicate=lambda node: node.test.name == flag_to_remove_name
-    )
-    original_ast = astroid.parse(code_block)
+    @staticmethod
+    def add_args(arg_parser):
+        arg_parser.add_argument(
+            "--flag-name",
+            dest="flag_name",
+            metavar="FLAG_NAME",
+            help="Name of the feature flag to be processed",
+            type=str,
+            required=True,
+        )
 
-    return original_ast.as_string().rstrip()
+    def __init__(self, context, flag_name):
+        super().__init__(context)
+        self.flag_name = flag_name
 
-
-def _process_if_block(node):
-    if_block_body = node.body[0]
-    if_block_body.lineno = node.lineno
-    if_block_body.col_offset = node.col_offset
-    if_block_body.parent = node.parent
-
-    return if_block_body
+    def leave_If(self, original_node, updated_node):
+        if matchers.matches(original_node.test, matchers.Name(self.flag_name)):
+            return FlattenSentinel(original_node.body.body)

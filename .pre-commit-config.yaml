@@ -36,4 +36,5 @@ repos:
     types: [python]
     args:
       - "--max-line-length=120"
+      - "--ignore=N802,D100,D101,D102,D107"
     exclude: 'setup.py|tests/.*'
