@@ -1,12 +1,14 @@
+import setuptools
 from setuptools import setup
 
 setup(
     name="piranha-python",
-    version="0.01",
-    packages=[""],
+    version="0.0.1.dev1",
+    package_dir={"": "src"},
+    packages=setuptools.find_packages(where="src"),
     url="https://github.com/ffmmjj/piranha-python",
     license="MIT",
-    author="felipe",
+    author="Felipe Martins",
     author_email="ffmmjj@gmail.com",
     description="",
 )

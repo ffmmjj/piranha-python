@@ -1,7 +1,7 @@
 import textwrap
 
 from libcst.codemod import CodemodTest
-from piranha import PiranhaCommand
+from piranha.codemods import PiranhaCommand
 
 
 class PiranhaCodemodTest(CodemodTest):
