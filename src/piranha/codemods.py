@@ -22,6 +22,9 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         self.is_in_feature_flag_block = False
         self.found_return_stmt_in_ff_block = False
 
+    def visit_Module(self, node):
+        return not self._is_test_module()
+
     def visit_If(self, node):
         self.is_in_feature_flag_block = matchers.matches(node.test, matchers.Name(self.flag_name))
         return True
@@ -39,3 +42,6 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             return RemoveFromParent()
 
         return updated_node
+
+    def _is_test_module(self):
+        return self.context.filename is not None and self.context.filename.startswith("test_")
