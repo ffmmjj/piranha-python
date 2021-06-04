@@ -81,6 +81,23 @@ class PiranhaCodemodTest(CodemodTest):
             context_override=_test_module_context(),
         )
 
+    def test_ignores_IF_block_when_ignored_modules_check_fn_thats_always_true_is_passed(self):
+        if_block_without_return_stmt = _as_clean_str(
+            """\
+            if %s:
+                print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+            % self.FEATURE_FLAG_NAME
+        )
+        self.assertCodemod(
+            if_block_without_return_stmt,
+            if_block_without_return_stmt,
+            flag_name=self.FEATURE_FLAG_NAME,
+            ignored_module_check_fn_path="test.test_codemods._always_return_true",
+        )
+
 
 def _test_module_context():
     return CodemodContext(filename="test_module.py", full_module_name="piranha.test_module")
@@ -88,3 +105,7 @@ def _test_module_context():
 
 def _as_clean_str(expected_code):
     return textwrap.dedent(expected_code).rstrip()
+
+
+def _always_return_true(_):
+    return True

@@ -6,6 +6,7 @@ from libcst.codemod import VisitorBasedCodemodCommand
 
 class PiranhaCommand(VisitorBasedCodemodCommand):
     DESCRIPTION = "Removes feature flag usages from code whilst trying to preserve the implementation's behavior"
+    DEFAULT_TEST_MODULE_CHECK_PATH = "piranha.codemods._is_test_module"
 
     @staticmethod
     def add_args(arg_parser):
@@ -17,19 +18,30 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             type=str,
             required=True,
         )
+        arg_parser.add_argument(
+            "--ignored-module-check-path",
+            dest="ignored_module_check_fn_path",
+            metavar="IGNORED_MODULE_CHECK_FN_PATH",
+            help="Path to a function that says whether a given module should be ignored given its full dotted path",
+            type=str,
+            required=False,
+        )
 
-    def __init__(self, context, flag_name):
+    def __init__(self, context, flag_name, ignored_module_check_fn_path=None):
         super().__init__(context)
         self.flag_name = flag_name
         self.is_in_feature_flag_block = False
         self.found_return_stmt_in_ff_block = False
-        # The function below could be customized in the future by passing its path via codemod arguments
-        module_test_function_path = "piranha.codemods._default_test_module_check"
-        loaded_test_function_module = importlib.import_module(_parent_of(module_test_function_path))
-        self._is_test_module = loaded_test_function_module.__getattribute__(_last_part_of(module_test_function_path))
+
+        if ignored_module_check_fn_path is None:
+            ignored_module_check_fn_path = self.DEFAULT_TEST_MODULE_CHECK_PATH
+        loaded_ignore_function_module = importlib.import_module(_parent_of(ignored_module_check_fn_path))
+        self._ignore_module = loaded_ignore_function_module.__getattribute__(
+            _last_part_of(ignored_module_check_fn_path)
+        )
 
     def visit_Module(self, node):
-        return not self._is_test_module(self.context.full_module_name)
+        return not self._ignore_module(self.context.full_module_name)
 
     def visit_If(self, node):
         self.is_in_feature_flag_block = matchers.matches(node.test, matchers.Name(self.flag_name))
@@ -50,7 +62,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         return updated_node
 
 
-def _default_test_module_check(full_module_name):
+def _is_test_module(full_module_name):
     if full_module_name is not None:
         filename = _last_part_of(full_module_name)
         return filename.startswith("test_")
