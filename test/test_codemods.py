@@ -83,7 +83,7 @@ class PiranhaCodemodTest(CodemodTest):
 
 
 def _test_module_context():
-    return CodemodContext(filename="test_module.py")
+    return CodemodContext(filename="test_module.py", full_module_name="piranha.test_module")
 
 
 def _as_clean_str(expected_code):
