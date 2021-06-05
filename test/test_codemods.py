@@ -98,6 +98,106 @@ class PiranhaCodemodTest(CodemodTest):
             ignored_module_check_fn_path="test.test_codemods._always_return_true",
         )
 
+    def test_keeps_single_lined_docstring_in_module(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            \"\"\" Single lined docstring for this module \"\"\"
+            if %s:
+                return 0
+
+            print('This is not related to the feature flag value at all')
+            """
+                % self.FEATURE_FLAG_NAME
+            ),
+            _as_clean_str(
+                """\
+            \"\"\" Single lined docstring for this module \"\"\"
+            return 0
+            """
+            ),
+            flag_name=self.FEATURE_FLAG_NAME,
+        )
+
+    def test_keeps_multi_lined_docstring_in_module(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            \"\"\"
+            Multi lined
+            docstring for this module
+            \"\"\"
+            if %s:
+                return 0
+
+            print('This is not related to the feature flag value at all')
+            """
+                % self.FEATURE_FLAG_NAME
+            ),
+            _as_clean_str(
+                """\
+            \"\"\"
+            Multi lined
+            docstring for this module
+            \"\"\"
+            return 0
+            """
+            ),
+            flag_name=self.FEATURE_FLAG_NAME,
+        )
+
+    def test_keeps_single_lined_docstring_in_function(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def func1():
+                \"\"\" Single lined docstring for this function \"\"\"
+                if %s:
+                    return 0
+
+                print('This is not related to the feature flag value at all')
+            """
+                % self.FEATURE_FLAG_NAME
+            ),
+            _as_clean_str(
+                """\
+            def func1():
+                \"\"\" Single lined docstring for this function \"\"\"
+                return 0
+            """
+            ),
+            flag_name=self.FEATURE_FLAG_NAME,
+        )
+
+    def test_keeps_multi_lined_docstring_in_function(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def func1():
+                \"\"\"
+                Multi lined
+                docstring for this module
+                \"\"\"
+                if %s:
+                    return 0
+
+                print('This is not related to the feature flag value at all')
+            """
+                % self.FEATURE_FLAG_NAME
+            ),
+            _as_clean_str(
+                """\
+            def func1():
+                \"\"\"
+                Multi lined
+                docstring for this module
+                \"\"\"
+                return 0
+            """
+            ),
+            flag_name=self.FEATURE_FLAG_NAME,
+        )
+
     def test_can_work_with_multiple_defs_in_module(self):
         self.assertCodemod(
             _as_clean_str(
