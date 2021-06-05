@@ -98,6 +98,42 @@ class PiranhaCodemodTest(CodemodTest):
             ignored_module_check_fn_path="test.test_codemods._always_return_true",
         )
 
+    def test_can_work_with_multiple_defs_in_module(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+                def func1():
+                    if %(flag_name)s:
+                        print('Flag is active')
+                        return 0
+
+                    print('This is not related to the feature flag value at all')
+
+
+                def func2():
+                    print('This is not related to the feature flag value at all')
+
+                    if %(flag_name)s:
+                        print('Flag is active')
+                """
+                % {"flag_name": self.FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+                def func1():
+                    print('Flag is active')
+                    return 0
+
+
+                def func2():
+                    print('This is not related to the feature flag value at all')
+                    print('Flag is active')
+                """
+                % {"flag_name": self.FEATURE_FLAG_NAME}
+            ),
+            flag_name=self.FEATURE_FLAG_NAME,
+        )
+
 
 def _test_module_context():
     return CodemodContext(filename="test_module.py", full_module_name="piranha.test_module")

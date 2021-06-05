@@ -30,11 +30,11 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
     def __init__(self, context, flag_name, ignored_module_check_fn_path=None):
         super().__init__(context)
         self.flag_name = flag_name
-        self.is_in_feature_flag_block = False
-        self.found_return_stmt_in_ff_block = False
+        self._reset_traversal_state()
 
         if ignored_module_check_fn_path is None:
             ignored_module_check_fn_path = self.DEFAULT_TEST_MODULE_CHECK_PATH
+
         loaded_ignore_function_module = importlib.import_module(_parent_of(ignored_module_check_fn_path))
         self._ignore_module = loaded_ignore_function_module.__getattribute__(
             _last_part_of(ignored_module_check_fn_path)
@@ -42,6 +42,11 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
 
     def visit_Module(self, node):
         return not self._ignore_module(self.context.full_module_name)
+
+    def leave_FunctionDef(self, original_node, updated_node):
+        self._reset_traversal_state()
+
+        return updated_node
 
     def visit_If(self, node):
         self.is_in_feature_flag_block = matchers.matches(node.test, matchers.Name(self.flag_name))
@@ -60,6 +65,10 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             return RemoveFromParent()
 
         return updated_node
+
+    def _reset_traversal_state(self):
+        self.is_in_feature_flag_block = False
+        self.found_return_stmt_in_ff_block = False
 
 
 def _is_test_module(full_module_name):
