@@ -26,13 +26,13 @@ modules:
 ```
 
 Then, finally, run Piranha passing the name of the feature flag that must be removed
-and directory where it should look for Python source files:
+and of the directory where it should look for Python source files:
 ```
 python3 -m libcst.tool codemod codemods.PiranhaCommand --flag-name <FEATURE_FLAG_NAME> <directory_path>
 ```
 
 Use the following command to check further options available to use from libCST's codemod and additional
-argument that can be passed to Piranha:
+arguments that can be passed to Piranha:
 ```
 python3 -m libcst.tool codemod codemods.PiranhaCommand -h
 ```
