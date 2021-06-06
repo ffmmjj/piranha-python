@@ -13,5 +13,5 @@ test: venv
 build:
 	. venv/bin/activate; python3 -m build
 
-release-test:
+release-test: build
 	. venv/bin/activate; python3 -m twine upload --repository testpypi dist/*
