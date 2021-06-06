@@ -234,6 +234,29 @@ class PiranhaCodemodTest(CodemodTest):
             flag_name=self.FEATURE_FLAG_NAME,
         )
 
+    def test_removes_simple_flag_declaration_statement(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            %(flag_name)s = True
+
+            if %(flag_name)s:
+                print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": self.FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=self.FEATURE_FLAG_NAME,
+        )
+
 
 def _test_module_context():
     return CodemodContext(filename="test_module.py", full_module_name="piranha.test_module")

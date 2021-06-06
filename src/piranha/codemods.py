@@ -48,6 +48,12 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
 
         return updated_node
 
+    def leave_Assign(self, original_node, updated_node):
+        if any(matchers.matches(t.target, matchers.Name(self.flag_name)) for t in updated_node.targets):
+            return RemoveFromParent()
+
+        return updated_node
+
     def visit_If(self, node):
         self.is_in_feature_flag_block = matchers.matches(node.test, matchers.Name(self.flag_name))
         return True
