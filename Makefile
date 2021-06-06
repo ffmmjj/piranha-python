@@ -10,7 +10,10 @@ venv/touchfile: requirements.txt
 test: venv
 	. venv/bin/activate; PYTHONPATH='./src' python -m unittest
 
-build:
+clean:
+	rm -rf build/ dist/ src/piranha_pthon.egg-info
+
+build: clean
 	. venv/bin/activate; python3 -m build
 
 release-test: build
