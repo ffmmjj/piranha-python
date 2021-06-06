@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="piranha-python",
-    version="0.0.1.dev1",
+    version="0.0.1.dev2",
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     install_requires=["libcst>=0,<1"],
