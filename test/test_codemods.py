@@ -281,6 +281,30 @@ class PiranhaCodemodTest(CodemodTest):
             flag_name=self.FEATURE_FLAG_NAME,
         )
 
+    def test_removes_only_flag_declaration_from_multiple_assignment_via_tuple_unpacking(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            ANOTHER_FLAG, %(flag_name)s, YET_ANOTHER_FLAG = False, True, True
+
+            if %(flag_name)s:
+                print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": self.FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            ANOTHER_FLAG, YET_ANOTHER_FLAG = False, True
+            print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=self.FEATURE_FLAG_NAME,
+        )
+
 
 def _test_module_context():
     return CodemodContext(filename="test_module.py", full_module_name="piranha.test_module")

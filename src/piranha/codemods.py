@@ -49,6 +49,9 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         return updated_node
 
     def leave_Assign(self, original_node, updated_node):
+        if self._is_tuple_assignment(updated_node):
+            return self._updated_tuple_assignment(updated_node)
+
         targets_without_flag = [
             t for t in updated_node.targets if not matchers.matches(t.target, matchers.Name(self.flag_name))
         ]
@@ -78,6 +81,39 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
     def _reset_traversal_state(self):
         self.is_in_feature_flag_block = False
         self.found_return_stmt_in_ff_block = False
+
+    def _updated_tuple_assignment(self, updated_node):
+        assignee_tuple = updated_node.targets[0].target
+        assignee_tuple_children_without_flag = [
+            (i, c)
+            for i, c in enumerate(assignee_tuple.children)
+            if not matchers.matches(c.value, matchers.Name(self.flag_name))
+        ]
+        assignee_tuple_children_indices_without_flag = [i for i, _ in assignee_tuple_children_without_flag]
+        assigned_tuple = updated_node.value
+        return updated_node.with_changes(
+            targets=[
+                updated_node.targets[0].with_changes(
+                    target=assignee_tuple.with_changes(
+                        elements=tuple([c for _, c in assignee_tuple_children_without_flag])
+                    )
+                )
+            ],
+            value=assigned_tuple.with_changes(
+                elements=tuple(
+                    [
+                        v
+                        for i, v in enumerate(assigned_tuple.children)
+                        if i in assignee_tuple_children_indices_without_flag
+                    ]
+                )
+            ),
+        )
+
+    def _is_tuple_assignment(self, updated_node):
+        return len(updated_node.targets) == 1 and matchers.matches(
+            updated_node.targets[0].target, matchers.TypeOf(matchers.Tuple)
+        )
 
 
 def _is_test_module(full_module_name):
