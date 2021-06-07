@@ -360,7 +360,6 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             flag_name=FEATURE_FLAG_NAME,
         )
 
-    @unittest.skip("Not implemented yet")
     def test_removes_aliased_flag_along_with_its_import_statement(self):
         self.assertCodemod(
             _as_clean_str(
@@ -374,6 +373,28 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             ),
             _as_clean_str(
                 """\
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+        )
+
+    def test_removes_aliased_flag_from_multiple_aliased_imports(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            from feature_flags import %(flag_name)s as MY_ALIASED_FLAG_NAME, ANOTHER_FLAG as ANOTHER_ALIASED_FLAG
+
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            from feature_flags import ANOTHER_FLAG as ANOTHER_ALIASED_FLAG
+
+
             print('This is not related to the feature flag value at all')
             """
             ),
