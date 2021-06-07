@@ -1,4 +1,5 @@
 import textwrap
+import unittest
 
 from libcst.codemod import CodemodContext, CodemodTest
 from piranha.codemods import PiranhaCommand
@@ -308,6 +309,73 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
             ANOTHER_FLAG, YET_ANOTHER_FLAG = False, True
             print('Flag is active')
 
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+        )
+
+
+class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
+    TRANSFORM = PiranhaCommand
+
+    @unittest.skip("Not implemented yet")
+    def test_remove_unaliased_flag_from_single_direct_import(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            from feature_flags import %(flag_name)s
+
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+        )
+
+    @unittest.skip("Not implemented yet")
+    def test_remove_unaliased_flag_from_multiple_direct_imports(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            from feature_flags import ANOTHER_FLAG, %(flag_name)s, YET_ANOTHER_FLAG
+
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            from feature_flags import ANOTHER_FLAG, YET_ANOTHER_FLAG
+
+
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+        )
+
+    @unittest.skip("Not implemented yet")
+    def test_removes_aliased_flag_along_with_its_import_statement(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            from feature_flags import %(flag_name)s as MY_ALIASED_FLAG_NAME
+
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
             print('This is not related to the feature flag value at all')
             """
             ),
