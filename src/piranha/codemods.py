@@ -26,8 +26,16 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             type=str,
             required=False,
         )
+        arg_parser.add_argument(
+            "--method-name",
+            dest="method_name",
+            metavar="METHOD_NAME",
+            help="Name of the method used to resolve the flag value",
+            type=str,
+            required=False,
+        )
 
-    def __init__(self, context, flag_name, ignored_module_check_fn_path=None):
+    def __init__(self, context, flag_name, ignored_module_check_fn_path=None, method_name=None):
         super().__init__(context)
         self.flag_name = flag_name
         self._reset_traversal_state()
@@ -39,6 +47,8 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         self._ignore_module = loaded_ignore_function_module.__getattribute__(
             _last_part_of(ignored_module_check_fn_path)
         )
+
+        self.method_name = method_name
 
     def visit_Module(self, node):
         return self.flag_name in node.code and not self._ignore_module(self.context.full_module_name)
@@ -70,7 +80,17 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         return updated_node.with_changes(targets=targets_without_flag)
 
     def visit_If(self, node):
-        self.is_in_feature_flag_block = matchers.matches(node.test, matchers.Name(self.flag_name))
+        if self.method_name is None:
+            self.is_in_feature_flag_block = matchers.matches(node.test, matchers.Name(self.flag_name))
+        else:
+            self.is_in_feature_flag_block = matchers.matches(
+                node.test,
+                matchers.Call(
+                    func=matchers.Name(self.method_name),
+                    args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
+                ),
+            )
+
         return True
 
     def leave_If(self, original_node, updated_node):
@@ -80,6 +100,8 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
 
             self.is_in_feature_flag_block = False
             return FlattenSentinel(original_node.body.body)
+
+        return updated_node
 
     def leave_SimpleStatementLine(self, original_node, updated_node):
         if not self.is_in_feature_flag_block and self.found_return_stmt_in_ff_block:

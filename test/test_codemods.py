@@ -1,5 +1,4 @@
 import textwrap
-import unittest
 
 from libcst.codemod import CodemodContext, CodemodTest
 from piranha.codemods import PiranhaCommand
@@ -399,6 +398,53 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+        )
+
+
+class PiranhaCustomFlagResolutionTest(CodemodTest):
+    TRANSFORM = PiranhaCommand
+
+    def test_can_resolve_flag_via_custom_method_name(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def is_flag_active(f):
+                return True
+
+
+            def this_is_not_the_flag_method(f):
+                return True
+
+
+            if is_flag_active(%(flag_name)s):
+                print('Flag is active')
+
+            if this_is_not_the_flag_method(%(flag_name)s):
+                print('Nothing to see here')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            def is_flag_active(f):
+                return True
+
+
+            def this_is_not_the_flag_method(f):
+                return True
+            print('Flag is active')
+
+            if this_is_not_the_flag_method(%(flag_name)s):
+                print('Nothing to see here')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
 
