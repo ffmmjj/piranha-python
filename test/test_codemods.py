@@ -338,7 +338,6 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             flag_name=FEATURE_FLAG_NAME,
         )
 
-    @unittest.skip("Not implemented yet")
     def test_remove_unaliased_flag_from_multiple_direct_imports(self):
         self.assertCodemod(
             _as_clean_str(
