@@ -319,7 +319,6 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
 class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
-    @unittest.skip("Not implemented yet")
     def test_remove_unaliased_flag_from_single_direct_import(self):
         self.assertCodemod(
             _as_clean_str(

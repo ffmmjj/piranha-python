@@ -43,6 +43,12 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
     def visit_Module(self, node):
         return self.flag_name in node.code and not self._ignore_module(self.context.full_module_name)
 
+    def leave_ImportFrom(self, original_node, updated_node):
+        if self._import_has_feature_flag(updated_node):
+            return RemoveFromParent()
+
+        return updated_node
+
     def leave_FunctionDef(self, original_node, updated_node):
         self._reset_traversal_state()
 
@@ -77,6 +83,9 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             return RemoveFromParent()
 
         return updated_node
+
+    def _import_has_feature_flag(self, updated_node):
+        return len(matchers.findall(updated_node, matchers.Name(self.flag_name))) > 0
 
     def _reset_traversal_state(self):
         self.is_in_feature_flag_block = False
