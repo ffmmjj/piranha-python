@@ -41,7 +41,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         )
 
     def visit_Module(self, node):
-        return not self._ignore_module(self.context.full_module_name)
+        return self.flag_name in node.code and not self._ignore_module(self.context.full_module_name)
 
     def leave_FunctionDef(self, original_node, updated_node):
         self._reset_traversal_state()
