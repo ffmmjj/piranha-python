@@ -6,7 +6,7 @@ from piranha.codemods import PiranhaCommand
 FEATURE_FLAG_NAME = "FEATURE_FLAG_NAME"
 
 
-class PiranhaCodemodTest(CodemodTest):
+class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
     def test_keeps_IF_block_body_having_single_non_return_expression(self):

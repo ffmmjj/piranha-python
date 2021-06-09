@@ -50,6 +50,14 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
 
         self.method_name = method_name
 
+        if self.method_name is None:
+            self.flag_resolution_matcher = matchers.Name(self.flag_name)
+        else:
+            self.flag_resolution_matcher = matchers.Call(
+                func=matchers.Name(self.method_name),
+                args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
+            )
+
     def visit_Module(self, node):
         return self.flag_name in node.code and not self._ignore_module(self.context.full_module_name)
 
@@ -80,16 +88,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         return updated_node.with_changes(targets=targets_without_flag)
 
     def visit_If(self, node):
-        if self.method_name is None:
-            self.is_in_feature_flag_block = matchers.matches(node.test, matchers.Name(self.flag_name))
-        else:
-            self.is_in_feature_flag_block = matchers.matches(
-                node.test,
-                matchers.Call(
-                    func=matchers.Name(self.method_name),
-                    args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
-                ),
-            )
+        self.is_in_feature_flag_block = matchers.matches(node.test, self.flag_resolution_matcher)
 
         return True
 
