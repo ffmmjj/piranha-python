@@ -88,17 +88,23 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         return updated_node.with_changes(targets=targets_without_flag)
 
     def visit_If(self, node):
-        self.is_in_feature_flag_block = matchers.matches(node.test, self.flag_resolution_matcher)
-
+        self.is_in_feature_flag_block = len(matchers.findall(node.test, self.flag_resolution_matcher)) > 0
         return True
 
     def leave_If(self, original_node, updated_node):
         if self.is_in_feature_flag_block:
-            return_statements = matchers.findall(original_node.body, matchers.Return())
-            self.found_return_stmt_in_ff_block = len(return_statements) > 0
+            simple_not_flag_matcher = matchers.UnaryOperation(
+                operator=matchers.Not(), expression=self.flag_resolution_matcher
+            )
+            if matchers.matches(updated_node.test, simple_not_flag_matcher):
+                replaced_node = updated_node.orelse.body
+            else:
+                replaced_node = updated_node.body
+                return_statements = matchers.findall(original_node.body, matchers.Return())
+                self.found_return_stmt_in_ff_block = len(return_statements) > 0
 
             self.is_in_feature_flag_block = False
-            return FlattenSentinel(original_node.body.body)
+            return FlattenSentinel(replaced_node.body)
 
         return updated_node
 

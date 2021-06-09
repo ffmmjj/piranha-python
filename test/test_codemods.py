@@ -136,6 +136,29 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
         )
 
 
+class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
+    TRANSFORM = PiranhaCommand
+
+    def test_keeps_ELSE_block_body_when_flag_value_condition_is_false(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            if not %s:
+                print('Flag is active')
+            else:
+                print('This is not related to the feature flag value at all')
+            """
+                % FEATURE_FLAG_NAME
+            ),
+            _as_clean_str(
+                """\
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+        )
+
+
 class PiranhaCodemodDocstringsTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
