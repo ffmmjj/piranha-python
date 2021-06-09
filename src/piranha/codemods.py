@@ -92,24 +92,24 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         return True
 
     def leave_If(self, original_node, updated_node):
-        if self.is_in_feature_flag_block:
-            simple_not_flag_matcher = matchers.UnaryOperation(
-                operator=matchers.Not(), expression=self.flag_resolution_matcher
-            )
-            if matchers.matches(updated_node.test, simple_not_flag_matcher):
-                replaced_node = updated_node.orelse.body
-            else:
-                replaced_node = updated_node.body
-                return_statements = matchers.findall(original_node.body, matchers.Return())
-                self.found_return_stmt_in_ff_block = len(return_statements) > 0
+        if not self.is_in_feature_flag_block:
+            return updated_node
 
-            self.is_in_feature_flag_block = False
-            return FlattenSentinel(replaced_node.body)
+        simple_not_flag_matcher = matchers.UnaryOperation(
+            operator=matchers.Not(), expression=self.flag_resolution_matcher
+        )
+        if matchers.matches(updated_node.test, simple_not_flag_matcher):
+            replaced_node = updated_node.orelse.body
+        else:
+            replaced_node = updated_node.body
+            return_statements = matchers.findall(original_node.body, matchers.Return())
+            self.found_return_stmt_in_ff_block = len(return_statements) > 0
 
-        return updated_node
+        self.is_in_feature_flag_block = False
+        return FlattenSentinel(replaced_node.body)
 
     def leave_SimpleStatementLine(self, original_node, updated_node):
-        if not self.is_in_feature_flag_block and self.found_return_stmt_in_ff_block:
+        if self.found_return_stmt_in_ff_block:
             return RemoveFromParent()
 
         return updated_node
