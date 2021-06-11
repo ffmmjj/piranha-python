@@ -1,4 +1,5 @@
 import textwrap
+import unittest
 
 from libcst.codemod import CodemodContext, CodemodTest
 from piranha.codemods import PiranhaCommand
@@ -499,7 +500,7 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
         )
 
 
-class PiranhaCustomFlagResolutionTest(CodemodTest):
+class PiranhaCustomFlagResolutionMethodTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
     def test_can_resolve_flag_via_custom_method_name(self):
@@ -544,6 +545,65 @@ class PiranhaCustomFlagResolutionTest(CodemodTest):
             flag_name=FEATURE_FLAG_NAME,
             method_name="is_flag_active",
         )
+
+
+class PiranhaControlFlagResolutionMethodTest(CodemodTest):
+    TRANSFORM = PiranhaCommand
+
+    @unittest.skip("Not implemented yet")
+    def test_keeps_ELSE_block_when_flag_resolution_method_is_set_as_control(self):
+        _setup_custom_method_configs([{"methodName": "is_control_resolution_method", "flagType": "control"}])
+
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def is_control_resolution_method(f):
+                return False
+
+
+            def not_the_control_resolution_method(f):
+                return False
+
+
+            if is_control_resolution_method(%(flag_name)s):
+                print('Flag is active')
+            else:
+                print('Flag is inactive')
+
+            if not_the_control_resolution_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            def is_control_resolution_method(f):
+                return False
+
+
+            def not_the_control_resolution_method(f):
+                return True
+            print('Flag is inactive')
+
+            if not_the_control_resolution_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+        )
+
+
+def _setup_custom_method_configs(param):
+    pass
 
 
 def _test_module_context():
