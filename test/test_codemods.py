@@ -147,12 +147,16 @@ class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
                 print('Flag is active')
             else:
                 print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
             """
                 % FEATURE_FLAG_NAME
             ),
             _as_clean_str(
                 """\
             print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
@@ -166,12 +170,16 @@ class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
                 print('Flag is active')
             else:
                 print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
             """
                 % FEATURE_FLAG_NAME
             ),
             _as_clean_str(
                 """\
             print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
