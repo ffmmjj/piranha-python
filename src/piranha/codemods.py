@@ -102,8 +102,9 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             replaced_node = updated_node.orelse.body
         else:
             replaced_node = updated_node.body
-            return_statements = matchers.findall(original_node.body, matchers.Return())
-            self.found_return_stmt_in_ff_block = len(return_statements) > 0
+
+        return_statements = matchers.findall(replaced_node, matchers.Return())
+        self.found_return_stmt_in_ff_block = len(return_statements) > 0
 
         self.is_in_feature_flag_block = False
         return FlattenSentinel(replaced_node.body)
