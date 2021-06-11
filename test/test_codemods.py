@@ -209,6 +209,30 @@ class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
             flag_name=FEATURE_FLAG_NAME,
         )
 
+    def test_keeps_ELSE_block_body_and_remainder_when_IF_block_contains_return_statement_but_ELSE_doesnt(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            if not %s:
+                print('Flag is active')
+                return 0
+            else:
+                print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
+            """
+                % FEATURE_FLAG_NAME
+            ),
+            _as_clean_str(
+                """\
+            print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+        )
+
 
 class PiranhaCodemodDocstringsTest(CodemodTest):
     TRANSFORM = PiranhaCommand
