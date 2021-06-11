@@ -546,6 +546,77 @@ class PiranhaCustomFlagResolutionMethodTest(CodemodTest):
             method_name="is_flag_active",
         )
 
+    def test_doesnt_change_code_if_no_method_matches_the_empty_custom_resolution_method(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def this_is_not_the_flag_method(f):
+                return True
+
+
+            if this_is_not_the_flag_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            def this_is_not_the_flag_method(f):
+                return True
+
+
+            if this_is_not_the_flag_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+        )
+
+    def test_doesnt_change_code_if_no_method_matches_the_passed_custom_resolution_method(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def this_is_not_the_flag_method(f):
+                return True
+
+
+            if this_is_not_the_flag_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            def this_is_not_the_flag_method(f):
+                return True
+
+
+            if this_is_not_the_flag_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
+        )
+
 
 class PiranhaControlFlagResolutionMethodTest(CodemodTest):
     TRANSFORM = PiranhaCommand

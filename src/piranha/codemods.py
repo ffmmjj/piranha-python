@@ -100,8 +100,10 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         )
         if matchers.matches(updated_node.test, simple_not_flag_matcher):
             replaced_node = updated_node.orelse.body
-        else:
+        elif matchers.matches(updated_node.test, self.flag_resolution_matcher):
             replaced_node = updated_node.body
+        else:
+            return updated_node
 
         return_statements = matchers.findall(replaced_node, matchers.Return())
         self.found_return_stmt_in_ff_block = len(return_statements) > 0
