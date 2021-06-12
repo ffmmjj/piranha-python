@@ -156,6 +156,9 @@ class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
             method_name="is_flag_active",
         )
 
+    # TODO
+    #   Add tests to check for aliased flag name used in IF blocks
+
 
 class PiranhaFlagWithExplicitElseTest(CodemodTest):
     TRANSFORM = PiranhaCommand
