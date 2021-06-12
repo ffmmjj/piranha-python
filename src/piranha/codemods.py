@@ -19,6 +19,14 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             required=True,
         )
         arg_parser.add_argument(
+            "--method-name",
+            dest="method_name",
+            metavar="METHOD_NAME",
+            help="Name of the method used to resolve the flag value",
+            type=str,
+            required=True,
+        )
+        arg_parser.add_argument(
             "--ignored-module-check-path",
             dest="ignored_module_check_fn_path",
             metavar="IGNORED_MODULE_CHECK_FN_PATH",
@@ -26,37 +34,23 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             type=str,
             required=False,
         )
-        arg_parser.add_argument(
-            "--method-name",
-            dest="method_name",
-            metavar="METHOD_NAME",
-            help="Name of the method used to resolve the flag value",
-            type=str,
-            required=False,
-        )
 
-    def __init__(self, context, flag_name, ignored_module_check_fn_path=None, method_name=None):
+    def __init__(self, context, flag_name, method_name, ignored_module_check_fn_path=None):
         super().__init__(context)
         self.flag_name = flag_name
         self._reset_traversal_state()
 
         if ignored_module_check_fn_path is None:
             ignored_module_check_fn_path = self.DEFAULT_TEST_MODULE_CHECK_PATH
-
         loaded_ignore_function_module = importlib.import_module(_parent_of(ignored_module_check_fn_path))
         self._ignore_module = loaded_ignore_function_module.__getattribute__(
             _last_part_of(ignored_module_check_fn_path)
         )
 
-        self.method_name = method_name
-
-        if self.method_name is None:
-            self.flag_resolution_matcher = matchers.Name(self.flag_name)
-        else:
-            self.flag_resolution_matcher = matchers.Call(
-                func=matchers.Name(self.method_name),
-                args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
-            )
+        self.flag_resolution_matcher = matchers.Call(
+            func=matchers.Name(method_name),
+            args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
+        )
 
     def visit_Module(self, node):
         return self.flag_name in node.code and not self._ignore_module(self.context.full_module_name)

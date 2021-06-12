@@ -7,6 +7,20 @@ from piranha.codemods import PiranhaCommand
 FEATURE_FLAG_NAME = "FEATURE_FLAG_NAME"
 
 
+class PiranhaCodemodInitializationTests(CodemodTest):
+    TRANSFORM = PiranhaCommand
+
+    def test_lack_of_custom_method_name_raises_exception(self):
+        with self.assertRaises(TypeError) as thrown_exception:
+            self.assertCodemod(
+                "print('This is not related to the feature flag value at all')",
+                "print('This is not related to the feature flag value at all')",
+                flag_name=FEATURE_FLAG_NAME,
+            )
+
+        self.assertIn("method_name", thrown_exception.exception.args[0])
+
+
 class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
