@@ -14,7 +14,7 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
         self.assertCodemod(
             _as_clean_str(
                 """\
-            if %s:
+            if is_flag_active(%s):
                 print('Flag is active')
 
             print('This is not related to the feature flag value at all')
@@ -29,13 +29,14 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_keeps_only_IF_block_body_when_it_has_an_unconditional_return_expression(self):
         self.assertCodemod(
             _as_clean_str(
                 """\
-            if %s:
+            if is_flag_active(%s):
                 return 0
 
             print('This is not related to the feature flag value at all')
@@ -48,12 +49,13 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_ignores_IF_block_when_processing_a_test_module(self):
         if_block_without_return_stmt = _as_clean_str(
             """\
-            if %s:
+            if is_flag_active(%s):
                 print('Flag is active')
 
             print('This is not related to the feature flag value at all')
@@ -64,12 +66,13 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
             if_block_without_return_stmt,
             if_block_without_return_stmt,
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
             context_override=_test_module_context(),
         )
 
         if_block_with_return_stmt = _as_clean_str(
             """\
-            if %s:
+            if is_flag_active(%s):
                 return 0
 
             print('This is not related to the feature flag value at all')
@@ -80,13 +83,14 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
             if_block_with_return_stmt,
             if_block_with_return_stmt,
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
             context_override=_test_module_context(),
         )
 
     def test_ignores_IF_block_when_ignored_modules_check_fn_thats_always_true_is_passed(self):
         if_block_without_return_stmt = _as_clean_str(
             """\
-            if %s:
+            if is_flag_active(%s):
                 print('Flag is active')
 
             print('This is not related to the feature flag value at all')
@@ -97,6 +101,7 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
             if_block_without_return_stmt,
             if_block_without_return_stmt,
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
             ignored_module_check_fn_path="test.test_codemods._always_return_true",
         )
 
@@ -105,7 +110,7 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
             _as_clean_str(
                 """\
                 def func1():
-                    if %(flag_name)s:
+                    if is_flag_active(%(flag_name)s):
                         print('Flag is active')
                         return 0
 
@@ -115,7 +120,7 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
                 def func2():
                     print('This is not related to the feature flag value at all')
 
-                    if %(flag_name)s:
+                    if is_flag_active(%(flag_name)s):
                         print('Flag is active')
                 """
                 % {"flag_name": FEATURE_FLAG_NAME}
@@ -134,6 +139,7 @@ class PiranhaBranchesFlowWithoutExplicitElseTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
 
@@ -144,7 +150,7 @@ class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
         self.assertCodemod(
             _as_clean_str(
                 """\
-            if not %s:
+            if not is_flag_active(%s):
                 print('Flag is active')
             else:
                 print('This is not related to the feature flag value at all')
@@ -161,6 +167,7 @@ class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_keeps_ELSE_block_body_when_flag_value_condition_with_custom_method_is_false(self):
@@ -191,7 +198,7 @@ class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
         self.assertCodemod(
             _as_clean_str(
                 """\
-            if not %s:
+            if not is_flag_active(%s):
                 print('Flag is active')
             else:
                 print('This is not related to the feature flag value at all')
@@ -208,13 +215,14 @@ class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_keeps_ELSE_block_body_and_remainder_when_IF_block_contains_return_statement_but_ELSE_doesnt(self):
         self.assertCodemod(
             _as_clean_str(
                 """\
-            if not %s:
+            if not is_flag_active(%s):
                 print('Flag is active')
                 return 0
             else:
@@ -232,6 +240,7 @@ class PiranhaBranchesFlowWithExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
 
@@ -243,7 +252,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             _as_clean_str(
                 """\
             \"\"\" Single lined docstring for this module \"\"\"
-            if %s:
+            if is_flag_active(%s):
                 return 0
 
             print('This is not related to the feature flag value at all')
@@ -257,6 +266,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_keeps_multi_lined_docstring_in_module(self):
@@ -267,7 +277,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             Multi lined
             docstring for this module
             \"\"\"
-            if %s:
+            if is_flag_active(%s):
                 return 0
 
             print('This is not related to the feature flag value at all')
@@ -284,6 +294,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_keeps_single_lined_docstring_in_function(self):
@@ -292,7 +303,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
                 """\
             def func1():
                 \"\"\" Single lined docstring for this function \"\"\"
-                if %s:
+                if is_flag_active(%s):
                     return 0
 
                 print('This is not related to the feature flag value at all')
@@ -307,6 +318,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_keeps_multi_lined_docstring_in_function(self):
@@ -318,7 +330,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
                 Multi lined
                 docstring for this module
                 \"\"\"
-                if %s:
+                if is_flag_active(%s):
                     return 0
 
                 print('This is not related to the feature flag value at all')
@@ -336,6 +348,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
 
@@ -348,7 +361,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
                 """\
             %(flag_name)s = True
 
-            if %(flag_name)s:
+            if is_flag_active(%(flag_name)s):
                 print('Flag is active')
 
             print('This is not related to the feature flag value at all')
@@ -363,6 +376,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_removes_only_flag_declaration_from_multiple_assignment_of_same_value_statement(self):
@@ -371,7 +385,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
                 """\
             %(flag_name)s = ANOTHER_FLAG = True
 
-            if %(flag_name)s:
+            if is_flag_active(%(flag_name)s):
                 print('Flag is active')
 
             print('This is not related to the feature flag value at all')
@@ -387,6 +401,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_removes_only_flag_declaration_from_multiple_assignment_via_tuple_unpacking(self):
@@ -395,7 +410,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
                 """\
             ANOTHER_FLAG, %(flag_name)s, YET_ANOTHER_FLAG = False, True, True
 
-            if %(flag_name)s:
+            if is_flag_active(%(flag_name)s):
                 print('Flag is active')
 
             print('This is not related to the feature flag value at all')
@@ -411,6 +426,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
 
@@ -434,6 +450,7 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_remove_unaliased_flag_from_multiple_direct_imports(self):
@@ -456,6 +473,7 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_removes_aliased_flag_along_with_its_import_statement(self):
@@ -475,6 +493,7 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_removes_aliased_flag_from_multiple_aliased_imports(self):
@@ -497,54 +516,12 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-        )
-
-
-class PiranhaCustomFlagResolutionMethodTest(CodemodTest):
-    TRANSFORM = PiranhaCommand
-
-    def test_can_resolve_flag_via_custom_method_name(self):
-        self.assertCodemod(
-            _as_clean_str(
-                """\
-            def is_flag_active(f):
-                return True
-
-
-            def this_is_not_the_flag_method(f):
-                return True
-
-
-            if is_flag_active(%(flag_name)s):
-                print('Flag is active')
-
-            if this_is_not_the_flag_method(%(flag_name)s):
-                print('Nothing to see here')
-
-            print('This is not related to the feature flag value at all')
-            """
-                % {"flag_name": FEATURE_FLAG_NAME}
-            ),
-            _as_clean_str(
-                """\
-            def is_flag_active(f):
-                return True
-
-
-            def this_is_not_the_flag_method(f):
-                return True
-            print('Flag is active')
-
-            if this_is_not_the_flag_method(%(flag_name)s):
-                print('Nothing to see here')
-
-            print('This is not related to the feature flag value at all')
-            """
-                % {"flag_name": FEATURE_FLAG_NAME}
-            ),
-            flag_name=FEATURE_FLAG_NAME,
             method_name="is_flag_active",
         )
+
+
+class PiranhaCodemodUnchangedCodeTest(CodemodTest):
+    TRANSFORM = PiranhaCommand
 
     def test_doesnt_change_code_if_no_method_matches_the_empty_custom_resolution_method(self):
         self.assertCodemod(
@@ -579,6 +556,7 @@ class PiranhaCustomFlagResolutionMethodTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
     def test_doesnt_change_code_if_no_method_matches_the_passed_custom_resolution_method(self):
@@ -605,6 +583,34 @@ class PiranhaCustomFlagResolutionMethodTest(CodemodTest):
 
 
             if this_is_not_the_flag_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
+        )
+
+    def test_doesnt_change_code_when_flag_is_directly_used_as_boolean(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            if %(flag_name)s:
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            if %(flag_name)s:
                 print('Nothing to see here')
             else:
                 print('Nothing to see here either')
@@ -670,6 +676,7 @@ class PiranhaControlFlagResolutionMethodTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
+            method_name="is_flag_active",
         )
 
 
