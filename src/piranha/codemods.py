@@ -47,8 +47,13 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             _last_part_of(ignored_module_check_fn_path)
         )
 
+        method_resolution_name = (
+            flag_resolution_methods
+            if isinstance(flag_resolution_methods, str)
+            else flag_resolution_methods[0]["methodName"]
+        )
         self.flag_resolution_matcher = matchers.Call(
-            func=matchers.Name(flag_resolution_methods),
+            func=matchers.Name(method_resolution_name),
             args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
         )
 

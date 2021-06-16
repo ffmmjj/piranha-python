@@ -46,6 +46,28 @@ class PiranhaTreatmentFlagTest(CodemodTest):
             flag_resolution_methods="is_flag_active",
         )
 
+    def test_treatment_flag_can_be_specified_by_dict_array_instead_of_string(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            if is_flag_active(%s):
+                print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % FEATURE_FLAG_NAME
+            ),
+            _as_clean_str(
+                """\
+            print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods=[{"methodName": "is_flag_active", "flagType": "treatment"}],
+        )
+
     def test_keeps_only_IF_block_body_when_it_has_an_unconditional_return_expression(self):
         self.assertCodemod(
             _as_clean_str(
