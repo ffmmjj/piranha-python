@@ -20,7 +20,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         )
         arg_parser.add_argument(
             "--method-name",
-            dest="method_name",
+            dest="flag_resolution_methods",
             metavar="METHOD_NAME",
             help="Name of the method used to resolve the flag value",
             type=str,
@@ -35,7 +35,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             required=False,
         )
 
-    def __init__(self, context, flag_name, method_name, ignored_module_check_fn_path=None):
+    def __init__(self, context, flag_name, flag_resolution_methods, ignored_module_check_fn_path=None):
         super().__init__(context)
         self.flag_name = flag_name
         self._reset_traversal_state()
@@ -48,7 +48,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         )
 
         self.flag_resolution_matcher = matchers.Call(
-            func=matchers.Name(method_name),
+            func=matchers.Name(flag_resolution_methods),
             args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
         )
 

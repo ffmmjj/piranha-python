@@ -18,7 +18,7 @@ class PiranhaCodemodInitializationTests(CodemodTest):
                 flag_name=FEATURE_FLAG_NAME,
             )
 
-        self.assertIn("method_name", thrown_exception.exception.args[0])
+        self.assertIn("flag_resolution_methods", thrown_exception.exception.args[0])
 
 
 class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
@@ -43,7 +43,7 @@ class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_keeps_only_IF_block_body_when_it_has_an_unconditional_return_expression(self):
@@ -63,7 +63,7 @@ class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_ignores_IF_block_when_processing_a_test_module(self):
@@ -80,7 +80,7 @@ class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
             if_block_without_return_stmt,
             if_block_without_return_stmt,
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
             context_override=_test_module_context(),
         )
 
@@ -97,7 +97,7 @@ class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
             if_block_with_return_stmt,
             if_block_with_return_stmt,
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
             context_override=_test_module_context(),
         )
 
@@ -115,7 +115,7 @@ class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
             if_block_without_return_stmt,
             if_block_without_return_stmt,
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
             ignored_module_check_fn_path="test.test_codemods._always_return_true",
         )
 
@@ -153,7 +153,7 @@ class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     # TODO
@@ -184,7 +184,7 @@ class PiranhaFlagWithExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_keeps_ELSE_block_body_when_flag_value_condition_with_custom_method_is_false(self):
@@ -208,7 +208,7 @@ class PiranhaFlagWithExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_keeps_only_ELSE_block_body_when_it_contains_return_statement_and_flag_value_condition_is_false(self):
@@ -232,7 +232,7 @@ class PiranhaFlagWithExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_keeps_ELSE_block_body_and_remainder_when_IF_block_contains_return_statement_but_ELSE_doesnt(self):
@@ -257,7 +257,7 @@ class PiranhaFlagWithExplicitElseTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
 
@@ -283,7 +283,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_keeps_multi_lined_docstring_in_module(self):
@@ -311,7 +311,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_keeps_single_lined_docstring_in_function(self):
@@ -335,7 +335,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_keeps_multi_lined_docstring_in_function(self):
@@ -365,7 +365,7 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
 
@@ -393,7 +393,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_removes_only_flag_declaration_from_multiple_assignment_of_same_value_statement(self):
@@ -418,7 +418,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_removes_only_flag_declaration_from_multiple_assignment_via_tuple_unpacking(self):
@@ -443,7 +443,7 @@ class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
 
@@ -467,7 +467,7 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_remove_unaliased_flag_from_multiple_direct_imports(self):
@@ -490,7 +490,7 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_removes_aliased_flag_along_with_its_import_statement(self):
@@ -510,7 +510,7 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_removes_aliased_flag_from_multiple_aliased_imports(self):
@@ -533,7 +533,7 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             """
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
 
@@ -573,7 +573,7 @@ class PiranhaCodemodUnchangedCodeTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_doesnt_change_code_if_no_method_matches_the_passed_custom_resolution_method(self):
@@ -609,7 +609,7 @@ class PiranhaCodemodUnchangedCodeTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
     def test_doesnt_change_code_when_flag_is_directly_used_as_boolean(self):
@@ -637,7 +637,7 @@ class PiranhaCodemodUnchangedCodeTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods="is_flag_active",
         )
 
 
@@ -646,8 +646,6 @@ class PiranhaControlFlagResolutionMethodTest(CodemodTest):
 
     @unittest.skip("Not implemented yet")
     def test_keeps_ELSE_block_when_flag_resolution_method_is_set_as_control(self):
-        _setup_custom_method_configs([{"methodName": "is_control_resolution_method", "flagType": "control"}])
-
         self.assertCodemod(
             _as_clean_str(
                 """\
@@ -656,7 +654,7 @@ class PiranhaControlFlagResolutionMethodTest(CodemodTest):
 
 
             def not_the_control_resolution_method(f):
-                return False
+                return True
 
 
             if is_control_resolution_method(%(flag_name)s):
@@ -681,6 +679,8 @@ class PiranhaControlFlagResolutionMethodTest(CodemodTest):
 
             def not_the_control_resolution_method(f):
                 return True
+
+
             print('Flag is inactive')
 
             if not_the_control_resolution_method(%(flag_name)s):
@@ -693,12 +693,8 @@ class PiranhaControlFlagResolutionMethodTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
-            method_name="is_flag_active",
+            flag_resolution_methods=[{"methodName": "is_flag_active", "flagType": "control"}],
         )
-
-
-def _setup_custom_method_configs(param):
-    pass
 
 
 def _test_module_context():
