@@ -38,7 +38,8 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
     def __init__(self, context, flag_name, flag_resolution_methods, ignored_module_check_fn_path=None):
         super().__init__(context)
         self.flag_name = flag_name
-        self._reset_traversal_state()
+        self.is_in_feature_flag_block = False
+        self.found_return_stmt_in_ff_block = False
 
         if ignored_module_check_fn_path is None:
             ignored_module_check_fn_path = self.DEFAULT_TEST_MODULE_CHECK_PATH
@@ -47,11 +48,13 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             _last_part_of(ignored_module_check_fn_path)
         )
 
-        method_resolution_name = (
-            flag_resolution_methods
-            if isinstance(flag_resolution_methods, str)
-            else flag_resolution_methods[0]["methodName"]
-        )
+        if isinstance(flag_resolution_methods, str):
+            method_resolution_name = flag_resolution_methods
+            self.is_treatment_method = True
+        else:
+            method_resolution_name = flag_resolution_methods[0]["methodName"]
+            self.is_treatment_method = flag_resolution_methods[0]["flagType"] == "treatment"
+
         self.flag_resolution_matcher = matchers.Call(
             func=matchers.Name(method_resolution_name),
             args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
@@ -100,7 +103,10 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         if matchers.matches(updated_node.test, simple_not_flag_matcher):
             replaced_node = updated_node.orelse.body
         elif matchers.matches(updated_node.test, self.flag_resolution_matcher):
-            replaced_node = updated_node.body
+            if self.is_treatment_method:
+                replaced_node = updated_node.body
+            else:
+                replaced_node = updated_node.orelse.body
         else:
             return updated_node
 

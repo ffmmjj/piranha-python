@@ -1,5 +1,4 @@
 import textwrap
-import unittest
 
 from libcst.codemod import CodemodContext, CodemodTest
 from piranha.codemods import PiranhaCommand
@@ -660,7 +659,6 @@ class PiranhaCodemodUnchangedCodeTest(CodemodTest):
 class PiranhaControlFlagTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
-    @unittest.skip("Not implemented yet")
     def test_keeps_ELSE_block_when_flag_resolution_method_is_set_as_control(self):
         self.assertCodemod(
             _as_clean_str(
@@ -695,8 +693,6 @@ class PiranhaControlFlagTest(CodemodTest):
 
             def not_the_control_resolution_method(f):
                 return True
-
-
             print('Flag is inactive')
 
             if not_the_control_resolution_method(%(flag_name)s):
@@ -709,7 +705,7 @@ class PiranhaControlFlagTest(CodemodTest):
                 % {"flag_name": FEATURE_FLAG_NAME}
             ),
             flag_name=FEATURE_FLAG_NAME,
-            flag_resolution_methods=[{"methodName": "is_flag_active", "flagType": "control"}],
+            flag_resolution_methods=[{"methodName": "is_control_resolution_method", "flagType": "control"}],
         )
 
 
