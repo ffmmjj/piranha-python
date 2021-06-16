@@ -78,7 +78,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         return updated_node
 
     def leave_Assign(self, original_node, updated_node):
-        if self._is_tuple_assignment(updated_node):
+        if _is_tuple_assignment(updated_node):
             return self._updated_tuple_assignment(updated_node)
 
         targets_without_flag = [
@@ -154,10 +154,11 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             ),
         )
 
-    def _is_tuple_assignment(self, updated_node):
-        return len(updated_node.targets) == 1 and matchers.matches(
-            updated_node.targets[0].target, matchers.TypeOf(matchers.Tuple)
-        )
+
+def _is_tuple_assignment(updated_node):
+    return len(updated_node.targets) == 1 and matchers.matches(
+        updated_node.targets[0].target, matchers.TypeOf(matchers.Tuple)
+    )
 
 
 def _is_test_module(full_module_name):

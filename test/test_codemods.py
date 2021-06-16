@@ -384,6 +384,90 @@ class PiranhaTreatmentFlagTest(CodemodTest):
     #   Add tests to check for aliased flag name used in IF blocks
 
 
+class PiranhaControlFlagTest(CodemodTest):
+    TRANSFORM = PiranhaCommand
+
+    def test_keeps_ELSE_block_when_flag_resolution_method_is_set_as_control(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def is_control_resolution_method(f):
+                return False
+
+
+            def not_the_control_resolution_method(f):
+                return True
+
+
+            if is_control_resolution_method(%(flag_name)s):
+                print('Flag is active')
+            else:
+                print('Flag is inactive')
+
+            if not_the_control_resolution_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            def is_control_resolution_method(f):
+                return False
+
+
+            def not_the_control_resolution_method(f):
+                return True
+            print('Flag is inactive')
+
+            if not_the_control_resolution_method(%(flag_name)s):
+                print('Nothing to see here')
+            else:
+                print('Nothing to see here either')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods=[{"methodName": "is_control_resolution_method", "flagType": "control"}],
+        )
+
+    def test_keeps_IF_block_when_flag_resolution_method_is_set_as_control_and_conditional_is_a_NOT(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def is_control_resolution_method(f):
+                return False
+
+
+            if not is_control_resolution_method(%(flag_name)s):
+                print('Flag is inactive')
+            else:
+                print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            def is_control_resolution_method(f):
+                return False
+            print('Flag is inactive')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods=[{"methodName": "is_control_resolution_method", "flagType": "control"}],
+        )
+
+
 class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
@@ -653,90 +737,6 @@ class PiranhaCodemodUnchangedCodeTest(CodemodTest):
             ),
             flag_name=FEATURE_FLAG_NAME,
             flag_resolution_methods="is_flag_active",
-        )
-
-
-class PiranhaControlFlagTest(CodemodTest):
-    TRANSFORM = PiranhaCommand
-
-    def test_keeps_ELSE_block_when_flag_resolution_method_is_set_as_control(self):
-        self.assertCodemod(
-            _as_clean_str(
-                """\
-            def is_control_resolution_method(f):
-                return False
-
-
-            def not_the_control_resolution_method(f):
-                return True
-
-
-            if is_control_resolution_method(%(flag_name)s):
-                print('Flag is active')
-            else:
-                print('Flag is inactive')
-
-            if not_the_control_resolution_method(%(flag_name)s):
-                print('Nothing to see here')
-            else:
-                print('Nothing to see here either')
-
-            print('This is not related to the feature flag value at all')
-            """
-                % {"flag_name": FEATURE_FLAG_NAME}
-            ),
-            _as_clean_str(
-                """\
-            def is_control_resolution_method(f):
-                return False
-
-
-            def not_the_control_resolution_method(f):
-                return True
-            print('Flag is inactive')
-
-            if not_the_control_resolution_method(%(flag_name)s):
-                print('Nothing to see here')
-            else:
-                print('Nothing to see here either')
-
-            print('This is not related to the feature flag value at all')
-            """
-                % {"flag_name": FEATURE_FLAG_NAME}
-            ),
-            flag_name=FEATURE_FLAG_NAME,
-            flag_resolution_methods=[{"methodName": "is_control_resolution_method", "flagType": "control"}],
-        )
-
-    def test_keeps_IF_block_when_flag_resolution_method_is_set_as_control_and_conditional_is_a_NOT(self):
-        self.assertCodemod(
-            _as_clean_str(
-                """\
-            def is_control_resolution_method(f):
-                return False
-
-
-            if not is_control_resolution_method(%(flag_name)s):
-                print('Flag is inactive')
-            else:
-                print('Flag is active')
-
-            print('This is not related to the feature flag value at all')
-            """
-                % {"flag_name": FEATURE_FLAG_NAME}
-            ),
-            _as_clean_str(
-                """\
-            def is_control_resolution_method(f):
-                return False
-            print('Flag is inactive')
-
-            print('This is not related to the feature flag value at all')
-            """
-                % {"flag_name": FEATURE_FLAG_NAME}
-            ),
-            flag_name=FEATURE_FLAG_NAME,
-            flag_resolution_methods=[{"methodName": "is_control_resolution_method", "flagType": "control"}],
         )
 
 
