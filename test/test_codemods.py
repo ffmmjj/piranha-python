@@ -708,6 +708,37 @@ class PiranhaControlFlagTest(CodemodTest):
             flag_resolution_methods=[{"methodName": "is_control_resolution_method", "flagType": "control"}],
         )
 
+    def test_keeps_IF_block_when_flag_resolution_method_is_set_as_control_and_conditional_is_a_NOT(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            def is_control_resolution_method(f):
+                return False
+
+
+            if not is_control_resolution_method(%(flag_name)s):
+                print('Flag is inactive')
+            else:
+                print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            def is_control_resolution_method(f):
+                return False
+            print('Flag is inactive')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods=[{"methodName": "is_control_resolution_method", "flagType": "control"}],
+        )
+
 
 def _test_module_context():
     return CodemodContext(filename="test_module.py", full_module_name="piranha.test_module")

@@ -97,16 +97,16 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         if not self.is_in_feature_flag_block:
             return updated_node
 
-        simple_not_flag_matcher = matchers.UnaryOperation(
-            operator=matchers.Not(), expression=self.flag_resolution_matcher
-        )
-        if matchers.matches(updated_node.test, simple_not_flag_matcher):
-            replaced_node = updated_node.orelse.body
-        elif matchers.matches(updated_node.test, self.flag_resolution_matcher):
+        if matchers.matches(updated_node.test, self.flag_resolution_matcher):
             if self.is_treatment_method:
                 replaced_node = updated_node.body
             else:
                 replaced_node = updated_node.orelse.body
+        elif matchers.matches(updated_node.test, _inside_not_matcher(self.flag_resolution_matcher)):
+            if self.is_treatment_method:
+                replaced_node = updated_node.orelse.body
+            else:
+                replaced_node = updated_node.body
         else:
             return updated_node
 
@@ -174,3 +174,7 @@ def _parent_of(module_test_function_path):
 
 def _last_part_of(module_test_function_path):
     return module_test_function_path.split(".")[-1]
+
+
+def _inside_not_matcher(fn_call_matcher):
+    return matchers.UnaryOperation(operator=matchers.Not(), expression=fn_call_matcher)
