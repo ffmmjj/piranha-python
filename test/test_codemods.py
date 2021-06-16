@@ -21,7 +21,7 @@ class PiranhaCodemodInitializationTests(CodemodTest):
         self.assertIn("flag_resolution_methods", thrown_exception.exception.args[0])
 
 
-class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
+class PiranhaTreatmentFlagTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
     def test_keeps_IF_block_body_having_single_non_return_expression(self):
@@ -156,37 +156,7 @@ class PiranhaFlagWithoutExplicitElseTest(CodemodTest):
             flag_resolution_methods="is_flag_active",
         )
 
-    # TODO
-    #   Add tests to check for aliased flag name used in IF blocks
-
-
-class PiranhaFlagWithExplicitElseTest(CodemodTest):
-    TRANSFORM = PiranhaCommand
-
-    def test_keeps_ELSE_block_body_when_flag_value_condition_is_false(self):
-        self.assertCodemod(
-            _as_clean_str(
-                """\
-            if not is_flag_active(%s):
-                print('Flag is active')
-            else:
-                print('This is not related to the feature flag value at all')
-
-            print('Completely unrelated statement')
-            """
-                % FEATURE_FLAG_NAME
-            ),
-            _as_clean_str(
-                """\
-            print('This is not related to the feature flag value at all')
-
-            print('Completely unrelated statement')
-            """
-            ),
-            flag_name=FEATURE_FLAG_NAME,
-            flag_resolution_methods="is_flag_active",
-        )
-
+    # Tests covering presence of ELSE blocks
     def test_keeps_ELSE_block_body_when_flag_value_condition_with_custom_method_is_false(self):
         self.assertCodemod(
             _as_clean_str(
@@ -260,10 +230,31 @@ class PiranhaFlagWithExplicitElseTest(CodemodTest):
             flag_resolution_methods="is_flag_active",
         )
 
+    def test_keeps_ELSE_block_body_when_flag_value_condition_is_false(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            if not is_flag_active(%s):
+                print('Flag is active')
+            else:
+                print('This is not related to the feature flag value at all')
 
-class PiranhaCodemodDocstringsTest(CodemodTest):
-    TRANSFORM = PiranhaCommand
+            print('Completely unrelated statement')
+            """
+                % FEATURE_FLAG_NAME
+            ),
+            _as_clean_str(
+                """\
+            print('This is not related to the feature flag value at all')
 
+            print('Completely unrelated statement')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods="is_flag_active",
+        )
+
+    # Tests covering the presence of docstrings in changed code
     def test_keeps_single_lined_docstring_in_module(self):
         self.assertCodemod(
             _as_clean_str(
@@ -367,6 +358,9 @@ class PiranhaCodemodDocstringsTest(CodemodTest):
             flag_name=FEATURE_FLAG_NAME,
             flag_resolution_methods="is_flag_active",
         )
+
+    # TODO
+    #   Add tests to check for aliased flag name used in IF blocks
 
 
 class PiranhaCodemodFlagDeclarationRemovalTest(CodemodTest):
@@ -641,7 +635,7 @@ class PiranhaCodemodUnchangedCodeTest(CodemodTest):
         )
 
 
-class PiranhaControlFlagResolutionMethodTest(CodemodTest):
+class PiranhaControlFlagTest(CodemodTest):
     TRANSFORM = PiranhaCommand
 
     @unittest.skip("Not implemented yet")
