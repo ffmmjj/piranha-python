@@ -87,6 +87,25 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
 
         return updated_node.with_changes(names=imported_names_after_removing_flag)
 
+    def leave_Import(self, original_node, updated_node):
+        flag_imports_nodes = [
+            n for n in updated_node.names if len(matchers.findall(n.name, matchers.Name(self.flag_name))) > 0
+        ]
+        if len(flag_imports_nodes) > 0 and flag_imports_nodes[0].asname is not None:
+            aliased_flag_name = flag_imports_nodes[0].asname.name.value
+            self.flag_resolution_matcher = matchers.Call(
+                func=matchers.Name(self.method_resolution_name),
+                args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(aliased_flag_name))),
+            )
+
+        imported_names_after_removing_flag = [
+            n for n in updated_node.names if len(matchers.findall(n.name, matchers.Name(self.flag_name))) == 0
+        ]
+        if len(imported_names_after_removing_flag) == 0:
+            return RemoveFromParent()
+
+        return updated_node.with_changes(names=imported_names_after_removing_flag)
+
     def leave_FunctionDef(self, original_node, updated_node):
         self._reset_traversal_state()
 

@@ -381,11 +381,35 @@ class PiranhaTreatmentFlagTest(CodemodTest):
         )
 
     # Aliased flag names tests
-    def test_removes_IF_block_that_uses_aliased_flag_name(self):
+    def test_removes_IF_block_that_uses_aliased_flag_name_via_import_from(self):
         self.assertCodemod(
             _as_clean_str(
                 """\
             from feature_flags import %(flag_name)s as MY_ALIASED_FLAG_NAME
+
+            if is_flag_active(MY_ALIASED_FLAG_NAME):
+                print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _as_clean_str(
+                """\
+            print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods="is_flag_active",
+        )
+
+    def test_removes_IF_block_that_uses_aliased_flag_name_via_simple_import(self):
+        self.assertCodemod(
+            _as_clean_str(
+                """\
+            import feature_flags.%(flag_name)s as MY_ALIASED_FLAG_NAME
 
             if is_flag_active(MY_ALIASED_FLAG_NAME):
                 print('Flag is active')
