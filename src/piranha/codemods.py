@@ -63,6 +63,14 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
     def visit_Module(self, node):
         return self.flag_name in node.code and not self._ignore_module(self.context.full_module_name)
 
+    def leave_Module(self, original_node, updated_node):
+        self.flag_resolution_matcher = matchers.Call(
+            func=matchers.Name(self.method_resolution_name),
+            args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
+        )
+
+        return updated_node
+
     def leave_ImportFrom(self, original_node, updated_node):
         aliased_flag_name = self._aliased_flag_name_from_import(updated_node)
         if aliased_flag_name is not None:
