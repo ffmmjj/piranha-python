@@ -681,6 +681,8 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             flag_resolution_methods="is_flag_active",
         )
 
+    # TODO add tests to cover removal of simple imports (instead of import from)
+
 
 class PiranhaCodemodUnchangedCodeTest(CodemodTest):
     TRANSFORM = PiranhaCommand
