@@ -49,14 +49,14 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         )
 
         if isinstance(flag_resolution_methods, str):
-            method_resolution_name = flag_resolution_methods
+            self.method_resolution_name = flag_resolution_methods
             self.is_treatment_method = True
         else:
-            method_resolution_name = flag_resolution_methods[0]["methodName"]
+            self.method_resolution_name = flag_resolution_methods[0]["methodName"]
             self.is_treatment_method = flag_resolution_methods[0]["flagType"] == "treatment"
 
         self.flag_resolution_matcher = matchers.Call(
-            func=matchers.Name(method_resolution_name),
+            func=matchers.Name(self.method_resolution_name),
             args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
         )
 
@@ -64,6 +64,13 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         return self.flag_name in node.code and not self._ignore_module(self.context.full_module_name)
 
     def leave_ImportFrom(self, original_node, updated_node):
+        aliased_flag_name = self._aliased_flag_name_from_import(updated_node)
+        if aliased_flag_name is not None:
+            self.flag_resolution_matcher = matchers.Call(
+                func=matchers.Name(self.method_resolution_name),
+                args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(aliased_flag_name))),
+            )
+
         imported_names_after_removing_flag = [
             n for n in updated_node.names if not matchers.matches(n.name, matchers.Name(self.flag_name))
         ]
@@ -125,6 +132,13 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
     def _reset_traversal_state(self):
         self.is_in_feature_flag_block = False
         self.found_return_stmt_in_ff_block = False
+
+    def _aliased_flag_name_from_import(self, updated_node):
+        flag_imports_nodes = [n for n in updated_node.names if matchers.matches(n.name, matchers.Name(self.flag_name))]
+        if len(flag_imports_nodes) > 0 and flag_imports_nodes[0].asname is not None:
+            return flag_imports_nodes[0].asname.name.value
+
+        return None
 
     def _updated_tuple_assignment(self, updated_node):
         assignee_tuple = updated_node.targets[0].target
