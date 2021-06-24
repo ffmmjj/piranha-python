@@ -705,6 +705,32 @@ class PiranhaCodemodFlagImportsHandlingTest(CodemodTest):
             flag_resolution_methods="is_flag_active",
         )
 
+    def test_removes_aliased_flag_along_with_its_simple_IMPORT_but_keeps_other_imports(self):
+        self.assertCodemod(
+            _with_correct_indentation(
+                """\
+            import feature_flags.%(flag_name)s as MY_ALIASED_FLAG_NAME, another.symbol as SOMETHING_ELSE
+
+
+            if is_flag_active(MY_ALIASED_FLAG_NAME):
+                print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+                % {"flag_name": FEATURE_FLAG_NAME}
+            ),
+            _with_correct_indentation(
+                """\
+            import another.symbol as SOMETHING_ELSE
+            print('Flag is active')
+
+            print('This is not related to the feature flag value at all')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods="is_flag_active",
+        )
+
 
 class PiranhaCodemodUnchangedCodeTest(CodemodTest):
     TRANSFORM = PiranhaCommand
