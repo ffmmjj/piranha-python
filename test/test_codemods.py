@@ -1,7 +1,7 @@
 import textwrap
 
-from codemods import PiranhaCommand
 from libcst.codemod import CodemodContext, CodemodTest
+from piranha_python.codemods import PiranhaCommand
 
 FEATURE_FLAG_NAME = "FEATURE_FLAG_NAME"
 

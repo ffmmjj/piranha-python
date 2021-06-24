@@ -1,0 +1,11 @@
+[run]
+branch = True
+source = piranha_python
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+ignore_errors = True
