@@ -6,7 +6,7 @@ from libcst.codemod import VisitorBasedCodemodCommand
 
 class PiranhaCommand(VisitorBasedCodemodCommand):
     DESCRIPTION = "Removes feature flag usages from code whilst trying to preserve the implementation's behavior"
-    DEFAULT_TEST_MODULE_CHECK_PATH = "piranha.codemods._is_test_module"
+    DEFAULT_TEST_MODULE_CHECK_PATH = "piranha_python.codemods._is_test_module"
 
     @staticmethod
     def add_args(arg_parser):  # pragma: no cover
