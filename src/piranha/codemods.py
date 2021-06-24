@@ -9,7 +9,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
     DEFAULT_TEST_MODULE_CHECK_PATH = "piranha.codemods._is_test_module"
 
     @staticmethod
-    def add_args(arg_parser):
+    def add_args(arg_parser):  # pragma: no cover
         arg_parser.add_argument(
             "--flag-name",
             dest="flag_name",
