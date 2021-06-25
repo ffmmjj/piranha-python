@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "piranha-python"
-version = "0.0.1.dev6"
+version = "0.0.1.dev7"
 description = ""
 authors = ["Felipe Martins <ffmmjj@gmail.com>"]
 homepage = "https://github.com/ffmmjj/piranha-python"
