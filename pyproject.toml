@@ -3,6 +3,7 @@ name = "piranha-python"
 version = "0.0.1.dev6"
 description = ""
 authors = ["Felipe Martins <ffmmjj@gmail.com>"]
+homepage = "https://github.com/ffmmjj/piranha-python"
 
 [tool.poetry.dependencies]
 python = "3.8.*"
@@ -18,6 +19,7 @@ libcst = "0.3.19"
 pep8-naming = "0.8.2"
 pre-commit = "1.17.0"
 pydocstyle = "<4"
+twine = "*"
 
 [build-system]
 requires = ["poetry>=1.1.6"]

@@ -19,4 +19,4 @@ build:
 	poetry build
 
 release-test: build
-	poetry publish -r testpypi
+	poetry run twine upload --repository testpypi dist/*
