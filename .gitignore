@@ -130,3 +130,6 @@ dmypy.json
 
 # Pycharm
 .idea
+
+# Local codemod config file (for local tests)
+.libcst.codemod.yaml
