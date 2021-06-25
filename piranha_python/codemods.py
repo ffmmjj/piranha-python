@@ -1,3 +1,4 @@
+import functools
 import importlib.util
 
 from libcst import FlattenSentinel, RemoveFromParent, matchers
@@ -57,7 +58,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
 
         self.flag_resolution_matcher = matchers.Call(
             func=matchers.Name(self.method_resolution_name),
-            args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
+            args=matchers.MatchIfTrue(functools.partial(_matches_flag_name, self.flag_name)),
         )
 
     def visit_Module(self, node):
@@ -66,7 +67,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
     def leave_Module(self, original_node, updated_node):
         self.flag_resolution_matcher = matchers.Call(
             func=matchers.Name(self.method_resolution_name),
-            args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(self.flag_name))),
+            args=matchers.MatchIfTrue(functools.partial(_matches_flag_name, self.flag_name)),
         )
 
         return updated_node
@@ -76,7 +77,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         if aliased_flag_name is not None:
             self.flag_resolution_matcher = matchers.Call(
                 func=matchers.Name(self.method_resolution_name),
-                args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(aliased_flag_name))),
+                args=matchers.MatchIfTrue(functools.partial(_matches_flag_name, aliased_flag_name)),
             )
 
         imported_names_after_removing_flag = [
@@ -95,7 +96,7 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             aliased_flag_name = flag_imports_nodes[0].asname.name.value
             self.flag_resolution_matcher = matchers.Call(
                 func=matchers.Name(self.method_resolution_name),
-                args=matchers.MatchIfTrue(lambda a: matchers.matches(a[0].value, matchers.Name(aliased_flag_name))),
+                args=matchers.MatchIfTrue(functools.partial(_matches_flag_name, aliased_flag_name)),
             )
 
         imported_names_after_removing_flag = [
@@ -194,6 +195,10 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
                 )
             ),
         )
+
+
+def _matches_flag_name(flag_name, n):
+    return matchers.matches(n[0].value, matchers.Name(flag_name))
 
 
 def _is_tuple_assignment(updated_node):
