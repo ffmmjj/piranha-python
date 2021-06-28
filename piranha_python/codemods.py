@@ -46,6 +46,9 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
 
     def __init__(self, context, flag_name, flag_resolution_methods, ignored_module_check_fn_path=None, mode="treated"):
         super().__init__(context)
+        if mode not in ("treated", "control"):
+            raise ValueError("mode parameter must be 'treated' or 'control' - '%s' was passed" % mode)
+
         self.flag_name = flag_name
         self.is_in_feature_flag_block = False
         self.found_return_stmt_in_ff_block = False

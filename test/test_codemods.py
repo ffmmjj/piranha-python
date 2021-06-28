@@ -19,6 +19,18 @@ class PiranhaCodemodInitializationTests(CodemodTest):
 
         self.assertIn("flag_resolution_methods", thrown_exception.exception.args[0])
 
+    def test_unsupported_mode_name_raises_exception(self):
+        with self.assertRaises(ValueError) as thrown_exception:
+            self.assertCodemod(
+                "print('This is not related to the feature flag value at all')",
+                "print('This is not related to the feature flag value at all')",
+                flag_name=FEATURE_FLAG_NAME,
+                flag_resolution_methods="is_flag_active",
+                mode="not-a-supported-mode",
+            )
+
+        self.assertIn("mode", thrown_exception.exception.args[0])
+
 
 class PiranhaTreatmentFlagTest(CodemodTest):
     TRANSFORM = PiranhaCommand
