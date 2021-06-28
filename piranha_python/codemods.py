@@ -35,12 +35,21 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
             type=str,
             required=False,
         )
+        arg_parser.add_argument(
+            "--mode",
+            dest="mode",
+            metavar="MODE",
+            help="Execution mode - can be 'treated' or 'control'",
+            type=str,
+            required=False,
+        )
 
-    def __init__(self, context, flag_name, flag_resolution_methods, ignored_module_check_fn_path=None):
+    def __init__(self, context, flag_name, flag_resolution_methods, ignored_module_check_fn_path=None, mode="treated"):
         super().__init__(context)
         self.flag_name = flag_name
         self.is_in_feature_flag_block = False
         self.found_return_stmt_in_ff_block = False
+        self.running_in_treated_mode = mode == "treated"
 
         if ignored_module_check_fn_path is None:
             ignored_module_check_fn_path = self.DEFAULT_TEST_MODULE_CHECK_PATH
@@ -132,18 +141,20 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
         if not self.is_in_feature_flag_block:
             return updated_node
 
-        if matchers.matches(updated_node.test, self.flag_resolution_matcher):
-            if self.is_treatment_method:
+        if self._should_assume_that_flag_is_true():
+            if matchers.matches(updated_node.test, self.flag_resolution_matcher):
                 replaced_node = updated_node.body
-            else:
-                replaced_node = updated_node.orelse.body
-        elif matchers.matches(updated_node.test, _inside_not_matcher(self.flag_resolution_matcher)):
-            if self.is_treatment_method:
+            elif matchers.matches(updated_node.test, _inside_not_matcher(self.flag_resolution_matcher)):
                 replaced_node = updated_node.orelse.body
             else:
-                replaced_node = updated_node.body
+                return updated_node
         else:
-            return updated_node
+            if matchers.matches(updated_node.test, self.flag_resolution_matcher):
+                replaced_node = updated_node.orelse.body
+            elif matchers.matches(updated_node.test, _inside_not_matcher(self.flag_resolution_matcher)):
+                replaced_node = updated_node.body
+            else:
+                return updated_node
 
         return_statements = matchers.findall(replaced_node, matchers.Return())
         self.found_return_stmt_in_ff_block = len(return_statements) > 0
@@ -194,6 +205,11 @@ class PiranhaCommand(VisitorBasedCodemodCommand):
                     ]
                 )
             ),
+        )
+
+    def _should_assume_that_flag_is_true(self):
+        return (self.is_treatment_method and self.running_in_treated_mode) or (
+            not self.is_treatment_method and not self.running_in_treated_mode
         )
 
 

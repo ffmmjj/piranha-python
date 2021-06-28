@@ -251,6 +251,85 @@ class PiranhaTreatmentFlagTest(CodemodTest):
             flag_resolution_methods="is_flag_active",
         )
 
+    # Tests covering "control" mode instead of the default "treated" mode
+    def test_keeps_ELSE_block_body_when_mode_is_control(self):
+        self.assertCodemod(
+            _with_correct_indentation(
+                """\
+            if is_flag_active(%s):
+                print('Flag is active')
+            else:
+                print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
+            """
+                % FEATURE_FLAG_NAME
+            ),
+            _with_correct_indentation(
+                """\
+            print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods="is_flag_active",
+            mode="control",
+        )
+
+    def test_keeps_only_ELSE_block_body_when_it_contains_return_statement_and_mode_is_control(self):
+        self.assertCodemod(
+            _with_correct_indentation(
+                """\
+            if is_flag_active(%s):
+                print('Flag is active')
+            else:
+                print('This is not related to the feature flag value at all')
+                return 0
+
+            print('Completely unrelated statement')
+            """
+                % FEATURE_FLAG_NAME
+            ),
+            _with_correct_indentation(
+                """\
+            print('This is not related to the feature flag value at all')
+            return 0
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods="is_flag_active",
+            mode="control",
+        )
+
+    def test_keeps_ELSE_block_body_and_remainder_when_IF_block_contains_return_statement_but_ELSE_doesnt_and_mode_is_control(
+        self
+    ):
+        self.assertCodemod(
+            _with_correct_indentation(
+                """\
+            if is_flag_active(%s):
+                print('Flag is active')
+                return 0
+            else:
+                print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
+            """
+                % FEATURE_FLAG_NAME
+            ),
+            _with_correct_indentation(
+                """\
+            print('This is not related to the feature flag value at all')
+
+            print('Completely unrelated statement')
+            """
+            ),
+            flag_name=FEATURE_FLAG_NAME,
+            flag_resolution_methods="is_flag_active",
+            mode="control",
+        )
+
     # Tests covering the presence of docstrings in changed code
     def test_keeps_single_lined_docstring_in_module(self):
         self.assertCodemod(
