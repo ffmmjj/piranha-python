@@ -251,30 +251,6 @@ class PiranhaTreatmentFlagTest(CodemodTest):
             flag_resolution_methods="is_flag_active",
         )
 
-    def test_keeps_ELSE_block_body_when_flag_value_condition_is_false(self):
-        self.assertCodemod(
-            _with_correct_indentation(
-                """\
-            if not is_flag_active(%s):
-                print('Flag is active')
-            else:
-                print('This is not related to the feature flag value at all')
-
-            print('Completely unrelated statement')
-            """
-                % FEATURE_FLAG_NAME
-            ),
-            _with_correct_indentation(
-                """\
-            print('This is not related to the feature flag value at all')
-
-            print('Completely unrelated statement')
-            """
-            ),
-            flag_name=FEATURE_FLAG_NAME,
-            flag_resolution_methods="is_flag_active",
-        )
-
     # Tests covering the presence of docstrings in changed code
     def test_keeps_single_lined_docstring_in_module(self):
         self.assertCodemod(
